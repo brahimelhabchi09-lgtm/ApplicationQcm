@@ -1,0 +1,35 @@
+services:
+  # ─── Backend API (Node.js / Express) ────────────────────────────────
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: qcm_backend
+    ports:
+      - "8001:3000"
+    environment:
+      - NODE_ENV=production
+      - PORT=3000
+    networks:
+      - qcm_network
+    restart: unless-stopped
+
+  # ─── Frontend (Vue 3 / Vite served by Nginx) ────────────────────────
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+      args:
+        - VITE_API_URL=http://localhost:8001/api
+    container_name: qcm_frontend
+    ports:
+      - "3939:80"
+    depends_on:
+      - backend
+    networks:
+      - qcm_network
+    restart: unless-stopped
+
+networks:
+  qcm_network:
+    driver: bridge
